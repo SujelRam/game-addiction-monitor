@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Game Addiction Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .alert-settings-form .form-group {
+            margin-bottom: 16px;
+        }
+        .alert-settings-form label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .alert-settings-form input[type="tel"],
+        .alert-settings-form input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .alert-settings-form .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .alert-settings-form .checkbox-label input {
+            margin-right: 8px;
+        }
+        .form-message {
+            margin-top: 16px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        .form-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        .form-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        .alert-history-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .alert-history-item:last-child {
+            border-bottom: none;
+        }
+        .alert-history-item .alert-type {
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        .alert-history-item .alert-message {
+            margin: 4px 0;
+            color: #666;
+        }
+        .alert-history-item .alert-meta {
+            font-size: 12px;
+            color: #999;
+        }
+        .email-status-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .email-status-card.configured {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .email-status-card.not-configured {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .email-status-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .email-status-icon {
+            font-size: 24px;
+        }
+        .email-status-title {
+            font-weight: 600;
+            margin: 0;
+        }
+        .email-status-text {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 12px 0;
+        }
+        .email-config-form {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .email-config-form.show {
+            display: block;
+        }
+        .email-config-form .form-group {
+            margin-bottom: 12px;
+        }
+        .email-config-form label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+        .email-config-form input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-top">
+                <div class="app-logo">&#127918;</div>
+                <div>
+                    <h1 class="app-title">Game Addiction Monitor</h1>
+                    <p class="app-subtitle">AI Alert System</p>
+                </div>
+            </div>
+
+            <nav class="menu" aria-label="Primary">
+                <button class="menu-item active" data-page="dashboard">
+                    <span class="menu-icon">&#9638;</span><span>Dashboard</span>
+                </button>
+                <button class="menu-item" data-page="monitoring">
+                    <span class="menu-icon">&#9654;</span><span>Start Monitoring</span>
+                </button>
+                <button class="menu-item" data-page="alerts">
+                    <span class="menu-icon">&#9888;</span><span>Alerts</span>
+                </button>
+                <button class="menu-item" data-page="profile">
+                    <span class="menu-icon">&#9673;</span><span>Profile</span>
+                </button>
+                <button class="menu-item" data-page="settings">
+                    <span class="menu-icon">&#9881;</span><span>Settings</span>
+                </button>
+                <a class="menu-item" href="{{ url_for('logout') }}">
+                    <span class="menu-icon">&#8617;</span><span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-shell">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button id="menuToggle" class="menu-toggle" aria-label="Toggle sidebar">&#9776;</button>
+                    <div>
+                        <p class="welcome">Welcome back</p>
+                        <h2 class="username">{{ user.name }}</h2>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="clock" id="currentDateTime">--</div>
+                    <button class="notify" id="notifyBtn" aria-label="Notifications">
+                        <span class="bell">&#128276;</span>
+                        <span class="notify-count" id="notifyCount">3</span>
+                    </button>
+                </div>
+            </header>
+
+            <section class="page active" id="dashboard">
+                <div class="card quick-actions-card">
+                    <div class="card-head">
+                        <h3>Quick Actions</h3>
+                        <span class="muted">Jump directly to workflow panels</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-primary nav-action-btn" id="startMonitoringQuick">Start Monitoring</button>
+                        <button class="btn-secondary nav-action-btn" data-target-page="alerts">View Alerts</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <article class="card metric-card">
+                        <p class="card-label">Today's Play Time</p>
+                        <p class="metric-value" id="totalPlayTimeMetric">{{ monitor_stats.total_play_time_display }}</p>
+                        <p class="muted"><span id="sessionCountMetric">{{ monitor_stats.total_sessions }}</span> sessions completed</p>
+                    </article>
+
+                    <article class="card metric-card">
+                        <p class="card-label">Current Risk Level</p>
+                        <div class="risk-badge risk-yellow">YELLOW</div>
+                        <p class="muted">Moderate risk trend detected</p>
+                    </article>
+
+                    <article class="card metric-card">
+                        <p class="card-label">Monitoring Status</p>
+                        <div class="status-pill {{ 'active' if monitor_state == 'running' else 'inactive' }}" id="monitorStatusPill">{{ 'Active' if monitor_state == 'running' else 'Paused' }}</div>
+                        <p class="muted" id="gamePresenceText">No game detected</p>
+                    </article>
+                </div>
+
+                <div class="dashboard-grid">
+                    <article class="card alerts-card">
+                        <div class="card-head">
+                            <h3>Recent Alerts</h3>
+                            <button class="text-btn nav-action-btn" data-target-page="alerts" type="button">View all</button>
+                        </div>
+                        <ul class="alert-list">
+                            <li><span class="dot yellow"></span>Extended session crossed 2 hours</li>
+                            <li><span class="dot red"></span>Late night usage after 12:00 AM</li>
+                            <li><span class="dot green"></span>Break reminder acknowledged</li>
+                        </ul>
+                    </article>
+
+                    <article class="card chart-card">
+                        <div class="card-head">
+                            <h3>Weekly Activity</h3>
+                            <span class="muted">Hours per day</span>
+                        </div>
+                        <canvas id="weeklyChart" height="380"></canvas>
+                    </article>
+
+                    <article class="card recommendation-card">
+                        <div class="card-head">
+                            <h3>Recommendations</h3>
+                            <button class="btn-primary" id="applyPlanBtn" type="button">Apply Plan</button>
+                        </div>
+                        <ul class="recommend-list">
+                            <li>Set auto break every 45 minutes.</li>
+                            <li>Restrict gameplay after 11:00 PM.</li>
+                            <li>Schedule one digital detox day this week.</li>
+                            <li>Share weekly report with parent or guardian.</li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+
+            <section class="page" id="monitoring">
+                <div class="page-content-grid">
+                <div class="card page-card">
+                    <h3>Start Monitoring</h3>
+                    <p class="muted">Monitoring control panel placeholder for process start or stop.</p>
+                    <div class="section-actions">
+                        <button class="btn-primary monitor-btn" data-monitor-action="start">Start</button>
+                        <button class="btn-secondary monitor-btn" data-monitor-action="pause">Pause</button>
+                        <button class="btn-danger monitor-btn" data-monitor-action="stop">Stop</button>
+                        <span class="monitor-timer-label">Play Time: <strong id="monitorTimerDisplay">00:00:00</strong></span>
+                    </div>
+                    <p class="muted" id="monitorGameStateText" style="margin-top: 10px;">No game detected</p>
+                </div>
+                
+                <div class="card page-card" style="margin-top: 24px;">
+                    <div class="card-head">
+                        <h3>Game History</h3>
+                        <button class="btn-secondary" id="refreshGameHistoryBtn" type="button">Refresh</button>
+                    </div>
+                    <div id="gameHistoryList">
+                        <p class="muted">No game history yet. Start monitoring to track games.</p>
+                    </div>
+                </div>
+                </div>
+            </section>
+
+            <section class="page" id="alerts">
+                <div class="page-content-grid">
+                <!-- Email Configuration Status -->
+                <div class="card page-card">
+                    <div id="emailStatusCard" class="email-status-card not-configured">
+                        <div class="email-status-header">
+                            <span class="email-status-icon" id="emailStatusIcon">⚠️</span>
+                            <h4 class="email-status-title">Email Status</h4>
+                        </div>
+                        <p class="email-status-text" id="emailStatusText">Email is not configured. Configure your Gmail to receive alerts.</p>
+                        <div class="section-actions">
+                            <button type="button" id="configureEmailBtn" class="btn-secondary">Configure Email</button>
+                            <button type="button" id="testEmailConnectionBtn" class="btn-primary">Test Connection</button>
+                        </div>
+                        <div id="emailConfigForm" class="email-config-form">
+                            <div class="form-group">
+                                <label for="gmailEmail">Gmail Address</label>
+                                <input type="email" id="gmailEmail" placeholder="your_email@gmail.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="gmailAppPassword">Gmail App Password (16 characters)</label>
+                                <input type="password" id="gmailAppPassword" placeholder="xxxx xxxx xxxx xxxx">
+                            </div>
+                            <div class="section-actions">
+                                <button type="button" id="saveEmailConfigBtn" class="btn-primary">Save Configuration</button>
+                                <button type="button" id="cancelEmailConfigBtn" class="btn-secondary">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card page-card">
+                    <h3>Email Alerts</h3>
+                    <p class="muted">Email alerts are automatically sent when a game is detected.</p>
+                    <div class="section-actions">
+                        <button type="button" id="testAlertBtn" class="btn-primary">Send Test Alert</button>
+                    </div>
+                </div>
+                
+                <div class="card page-card" style="margin-top: 24px;">
+                    <div class="card-head">
+                        <h3>Alert History</h3>
+                        <button class="btn-secondary" id="refreshAlertsBtn" type="button">Refresh</button>
+                    </div>
+                    <div id="alertsHistoryList">
+                        <p class="muted">No alerts yet.</p>
+                    </div>
+                </div>
+                
+                <div class="section-actions" style="margin-top: 24px;">
+                    <button class="btn-secondary nav-action-btn" data-target-page="dashboard">Back to Dashboard</button>
+                </div>
+                </div>
+            </section>
+
+            <section class="page" id="profile">
+                <div class="page-content-grid">
+                <div class="card page-card">
+                    <h3>Profile</h3>
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <label>Username:</label>
+                            <span>{{ user.name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <span>{{ user.email }}</span>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </section>
+
+            <section class="page" id="settings">
+                <div class="page-content-grid">
+                <div class="card page-card">
+                    <h3>Settings</h3>
+                    <p class="muted">Configure your preferences and thresholds.</p>
+                    
+                    <form id="settingsForm" class="alert-settings-form">
+                        <div class="form-group">
+                            <label for="dailyLimit">Daily Play Time Limit (hours)</label>
+                            <input type="number" id="dailyLimit" name="daily_limit" value="2" min="1" max="24">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="breakInterval">Break Reminder Interval (minutes)</label>
+                            <input type="number" id="breakInterval" name="break_interval" value="45" min="15" max="120">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bedtime">Bedtime Restriction (time)</label>
+                            <input type="time" id="bedtime" name="bedtime" value="23:00">
+                            <span class="muted" style="font-size: 12px;">Games will be restricted after this time</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enableBreaks" name="enable_breaks" checked>
+                                <span>Enable Break Reminders</span>
+                            </label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enableBedtime" name="enable_bedtime">
+                                <span>Enable Bedtime Restriction</span>
+                            </label>
+                        </div>
+                        
+                        <div class="section-actions">
+                            <button type="submit" class="btn-primary">Save Settings</button>
+                        </div>
+                    </form>
+                </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

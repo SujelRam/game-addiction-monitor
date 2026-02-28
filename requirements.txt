@@ -1,0 +1,4 @@
+Flask>=2.3
+pandas>=2.1
+Werkzeug>=2.3
+Flask-Migrate>=4.0

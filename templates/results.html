@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - Game Addiction Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">🎮 Game Addiction Monitor</h1>
+            <a href="/dashboard" class="nav-link">← New Assessment</a>
+        </div>
+    </nav>
+
+    <!-- Results Section -->
+    <section class="results-section">
+        <div class="container">
+            <h1 class="results-title">Your Analysis Results</h1>
+
+            <!-- Summary Card -->
+            <div class="card summary-card">
+                <h2>Your Gaming Behavior Summary</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="summary-label">Daily Gaming Hours:</span>
+                        <span class="summary-value">{{ user_data.hours }} hours</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Gaming Sessions:</span>
+                        <span class="summary-value">{{ user_data.sessions }} per day</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Night Gaming:</span>
+                        <span class="summary-value">{{ user_data.night_gaming|title }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classification Result Card -->
+            <div class="card classification-card status-{{ result.status_color }}">
+                <div class="status-indicator status-{{ result.status_color }}">
+                    <div class="status-icon">
+                        {% if result.classification == 'Normal' %}
+                            ✓
+                        {% elif result.classification == 'At Risk' %}
+                            ⚠
+                        {% else %}
+                            ⚠
+                        {% endif %}
+                    </div>
+                    <h2 class="status-title">{{ result.classification }}</h2>
+                    <div class="risk-score">
+                        Risk Score: <strong>{{ result.risk_score }}/100</strong>
+                    </div>
+                </div>
+
+                <!-- Risk Factors -->
+                {% if result.risk_factors %}
+                <div class="risk-factors">
+                    <h3>Identified Risk Factors:</h3>
+                    <ul class="risk-list">
+                        {% for factor in result.risk_factors %}
+                        <li>{{ factor }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Advice Card -->
+            <div class="card advice-card">
+                <h2>📋 Personalized Recommendations</h2>
+                <div class="advice-message">
+                    <p><strong>{{ result.advice.message }}</strong></p>
+                </div>
+                <div class="advice-tips">
+                    <h3>Action Steps:</h3>
+                    <ul class="tips-list">
+                        {% for tip in result.advice.tips %}
+                        <li>{{ tip }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="/dashboard" class="btn btn-primary">Take Another Assessment</a>
+                <a href="/" class="btn btn-secondary">Back to Home</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Game Addiction Monitor System | BCA Academic Project</p>
+            <p class="disclaimer">
+                <small>
+                    Disclaimer: This system provides educational insights only. 
+                    For serious concerns, please consult a healthcare professional.
+                </small>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

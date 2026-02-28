@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Addiction Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="landing">
+
+<!-- NAVBAR -->
+<div class="landing-nav">
+    <div class="landing-logo">
+        🎮 Game Addiction Monitor
+    </div>
+
+    <div class="landing-actions">
+        <a href="/login" class="btn-ghost">Login</a>
+        <a href="/register" class="btn-main">Create Account</a>
+    </div>
+</div>
+
+
+<!-- HERO -->
+<div class="hero">
+
+    <!-- TEXT -->
+    <div class="hero-text">
+        <h1>Smart Monitoring for Healthy Gaming Habits</h1>
+        <p>
+            Track playtime, analyze behavior patterns, and receive intelligent alerts
+            to maintain digital well-being.
+        </p>
+
+        <a href="/login" class="btn-main">Get Started</a>
+    </div>
+
+
+    <!-- IMAGE -->
+    <div class="hero-image">
+        <img src="{{ url_for('static', filename='images/gaming_room.png') }}" alt="Gaming Room">
+    </div>
+
+</div>
+
+
+<!-- FOOTER -->
+<div class="landing-footer">
+    © 2026 Game Addiction Monitor • Academic Project
+</div>
+
+</body>
+</html>

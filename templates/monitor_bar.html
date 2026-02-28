@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Bar</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Inter", "Segoe UI", sans-serif;
+            background: rgba(17, 24, 39, 0.96);
+            color: #f9fafb;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bar {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            gap: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+        }
+        .left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 6px;
+            min-width: 0;
+        }
+        .left-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .title {
+            font-size: 13px;
+            color: #cbd5e1;
+            white-space: nowrap;
+        }
+        .status {
+            font-size: 12px;
+            font-weight: 700;
+            color: #22c55e;
+            background: rgba(34, 197, 94, 0.15);
+            border-radius: 999px;
+            padding: 4px 10px;
+        }
+        .game-state {
+            font-size: 12px;
+            color: #cbd5e1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        button {
+            border: 0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .start { background: #2563eb; color: #fff; }
+        .pause { background: #f59e0b; color: #111827; }
+        .stop { background: #ef4444; color: #fff; }
+        .timer {
+            min-width: 88px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bar">
+        <div class="left">
+            <div class="left-top">
+                <span class="title">Game Monitoring</span>
+                <span class="status" id="barStatus">PAUSED</span>
+            </div>
+            <div class="game-state" id="barGameState">No game detected</div>
+        </div>
+        <div class="controls">
+            <button class="start" id="barStart">Start</button>
+            <button class="pause" id="barPause">Pause</button>
+            <button class="stop" id="barStop">Stop</button>
+            <div class="timer" id="barTimer">00:00:00</div>
+        </div>
+    </div>
+
+    <script>
+        const barStatus = document.getElementById("barStatus");
+        const barTimer = document.getElementById("barTimer");
+        const barStart = document.getElementById("barStart");
+        const barPause = document.getElementById("barPause");
+        const barStop = document.getElementById("barStop");
+
+        async function syncStatus() {
+            try {
+                const res = await fetch("/api/monitor/status");
+                if (!res.ok) return;
+                const data = await res.json();
+                barStatus.textContent = data.status.toUpperCase();
+                barStatus.style.color = data.status === "running" ? "#22c55e" : "#f59e0b";
+                barTimer.textContent = data.elapsed_display;
+                const text = data.game_detected ? `Playing: ${data.game_title}` : "No game detected";
+                document.getElementById("barGameState").textContent = text;
+            } catch (e) {
+                // Ignore sync failures for compact bar.
+            }
+        }
+
+        async function callMonitor(url) {
+            try {
+                await fetch(url, { method: "POST" });
+                await syncStatus();
+            } catch (e) {
+                // Ignore errors in compact bar.
+            }
+        }
+
+        barStart.addEventListener("click", () => callMonitor("/api/monitor/start"));
+        barPause.addEventListener("click", () => callMonitor("/api/monitor/pause"));
+        barStop.addEventListener("click", () => callMonitor("/api/monitor/stop"));
+
+        syncStatus();
+        setInterval(syncStatus, 1000);
+    </script>
+</body>
+</html>
